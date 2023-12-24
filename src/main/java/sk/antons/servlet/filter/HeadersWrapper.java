@@ -1,5 +1,17 @@
 /*
+ * Copyright 2023 Anton Straka
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package sk.antons.servlet.filter;
 
@@ -16,7 +28,7 @@ import java.util.Set;
  *
  * @author antons
  */
-public class Headers {
+public class HeadersWrapper {
     List<Header> data = new ArrayList<>();
 
     public Set<String> names() {
@@ -55,9 +67,9 @@ public class Headers {
         return null;
     }
 
-    public static Headers instance(HttpServletRequest request) {
+    public static HeadersWrapper instance(HttpServletRequest request) {
         if(request == null) return null;
-        Headers headers = new Headers();
+        HeadersWrapper headers = new HeadersWrapper();
         Enumeration<String> en = request.getHeaderNames();
         if(en != null) {
             while(en.hasMoreElements()) {
@@ -74,9 +86,9 @@ public class Headers {
         return headers;
     }
 
-    public static Headers instance(HttpServletResponse response) {
+    public static HeadersWrapper instance(HttpServletResponse response) {
         if(response == null) return null;
-        Headers headers = new Headers();
+        HeadersWrapper headers = new HeadersWrapper();
         Collection<String> en = response.getHeaderNames();
         if(en != null) {
             for(String name : en) {

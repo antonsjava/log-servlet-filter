@@ -25,39 +25,36 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import sk.antons.servlet.util.HttpServletRequestWrapper;
 import sk.antons.servlet.util.HttpServletResponseWrapper;
+import sk.antons.servlet.util.JsonFormat;
 import sk.antons.servlet.util.ServletRequestWrapper;
 import sk.antons.servlet.util.ServletResponseWrapper;
+import sk.antons.servlet.util.XmlFormat;
 
+/**
+ * Helper class for creating servlet filter for logging requests and responses.
+ *
+ * It allows to define set of (request condition, response condition and filter configuration)
+ *
+ * Filter for each request finds first item where request condition
+ * (or optional response condition) is valid and pronts info usinf asociated configuration.
+ *
+ * @author antons
+ */
 public class LogFilter implements Filter {
 
     private List<FilterConfSelector> selectors = new ArrayList<>();
 
     public static LogFilter instance() { return new LogFilter(); }
+    public LogFilter selector(FilterConfSelector selector) { this.selectors.add(selector); return this; }
 
-//    private final RequestLimiter<LogFilter> limiter = new RequestLimiter<LogFilter>(this);
-//    private Consumer consumer = new LogConsumer();
-//    private ConsumerStatus consumerStatus = new LogConsumerStatus();
-//    private Printable printable = new SimplePrintable();
-//    private Jsonable jsonable = new SimpleJsonable();
-//    private Xmlable xmlable = new SimpleXmlable();
-//    private final Set<String> requestHeaderFilter = new HashSet<String>();
-//    private final Set<String> responseHeaderFilter = new HashSet<String>();
-//    private boolean logRequestHeaders = true;
-//    private boolean logRequestPayload = true;
-//    private boolean logResponseHeaders = true;
-//    private boolean logResponsePayload = true;
-//    private boolean forceOneLine = true;
-//    private int truncateTo = 0;
-//    private int truncateLineTo = 0;
-//    private int truncateJsonelementTo = 0;
-//    private String requestBeforePrefix = "REQ";
-//    private String requestPrefix = "REQ";
-//    private String responsePrefix = "RES";
-//    private boolean logIdentity = false;
 
     @Override
     public void init(FilterConfig fc) throws ServletException {}
@@ -222,7 +219,7 @@ public class LogFilter implements Filter {
             requestheaderbuff.append(")");
         }
         if((conf.requestHeaderFormatter()!= null) && (httprequest != null)) {
-            Headers headers = Headers.instance(httprequest);
+            HeadersWrapper headers = HeadersWrapper.instance(httprequest);
             requestheaderbuff.append(' ').append(request.getProtocol());
             requestheaderbuff.append(" headers(");
             requestheaderbuff.append(conf.requestHeaderFormatter().apply(headers));
@@ -248,7 +245,7 @@ public class LogFilter implements Filter {
         HttpServletResponseWrapper httpresponse = null;
         if(response instanceof HttpServletResponseWrapper) httpresponse = (HttpServletResponseWrapper)response;
         if((conf.responseHeaderFormatter() != null) && (httpresponse != null)) {
-            Headers headers = Headers.instance(httpresponse);
+            HeadersWrapper headers = HeadersWrapper.instance(httpresponse);
             responseheadersbuff.append(" headers(");
             responseheadersbuff.append(conf.responseHeaderFormatter().apply(headers));
             responseheadersbuff.append(")");
@@ -269,4 +266,241 @@ public class LogFilter implements Filter {
 
     }
 
+    /**
+     * Filter configuration info
+     * @return
+     */
+    public String configurationInfo() {
+        StringBuilder sb = new StringBuilder();
+        for(FilterConfSelector selector : selectors) {
+            sb.append(selector.configurationInfo());
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Helper class for default HttpHeaders convertors.
+     */
+    public static class Headers {
+        /**
+         * Converts HttpHeaders as list of (key: value) pairs for all header values.
+         * @return
+         */
+        public static Function<sk.antons.servlet.filter.HeadersWrapper, String> all() {
+            return headers -> {
+                StringBuffer sb = new StringBuffer();
+                sb.append("headers[");
+                if(headers != null) {
+                    boolean first = true;
+                    for(sk.antons.servlet.filter.HeadersWrapper.Header header : headers.headers()) {
+                        if(first) first = false;
+                        else sb.append(", ");
+                        sb.append(header.name()).append(": ").append(header.value());
+                    }
+                }
+                sb.append("]");
+                return sb.toString();
+            };
+        }
+
+        /**
+         * Converts HttpHeaders as list of (key: value) pairs for listed header values.
+         * @return
+         */
+        public static Function<sk.antons.servlet.filter.HeadersWrapper, String> listed(final String... name) {
+            return headers -> {
+                StringBuffer sb = new StringBuffer();
+                sb.append("headers[");
+                if((headers != null) && (name != null)) {
+                    boolean first = true;
+                    for(sk.antons.servlet.filter.HeadersWrapper.Header header : headers.headers()) {
+                        String key = header.name();
+                        boolean match = false;
+                        for(String string : name) {
+                            if(key.equalsIgnoreCase(string)) {
+                                match = true;
+                                break;
+                            }
+                        }
+                        if(match) {
+                            if(first) first = false;
+                            else sb.append(", ");
+                            sb.append(key).append(": ").append(header.value());
+                        }
+                    }
+                }
+                sb.append("]");
+                return sb.toString();
+            };
+        }
+    }
+
+    /**
+     * Helper class for default Body to string converters.
+     */
+    public static class Body {
+
+        /**
+         * Converts body payload to string without modification (using utf-8)
+         * @return is to string converter
+         */
+        public static Function<InputStream, String> asIs() { return asIs("utf-8"); }
+
+        /**
+         * Converts body payload to string without modification
+         * @param encoding
+         * @return is to string converter
+         */
+        public static Function<InputStream, String> asIs(String encoding) {
+            return inputStream -> {
+                return readTextFromStream(inputStream, encoding);
+            };
+        }
+
+        /**
+         * Helper class for json to string formatter.
+         */
+        public static class Json {
+            private InputStream is;
+            private String encoding = "utf-9";
+            private String indent;
+            private boolean forceOneLine;
+            private int cutStringLiterals;
+
+            /**
+             * define input for converter
+             * @param is
+             * @return this
+             */
+            public static Json input(InputStream is) { Json json = new Json(); json.is = is; return json; }
+            /**
+             * define encoding of input (default is utf-8)
+             * @param value encoding like utf-8
+             * @return this
+             */
+            public Json encoding(String value) { this.encoding = value; return this; }
+            /**
+             * define indendation string if result must be indended
+             * @param value like "  "
+             * @return this
+             */
+            public Json indent(String value) { this.indent = value; return this; }
+            /**
+             * true if result must be formatted to one line
+             * @param value
+             * @return this
+             */
+            public Json forceOneLine(boolean value) { this.forceOneLine = value; return this; }
+            /**
+             * if literals are greater than specified value they vill be cuted. (default 0 - no cutting)
+             * @param value
+             * @return this
+             */
+            public Json cutStringLiterals(int value) { this.cutStringLiterals = value; return this; }
+            /**
+             * Create formatter.
+             * @return formatter
+             */
+            public Function<InputStream, String> format() {
+                return inputStream -> {
+                    try {
+                        JsonFormat format = JsonFormat.from(new InputStreamReader(is, encoding));
+                        if(cutStringLiterals > 0) format.cutStringLiterals(cutStringLiterals);
+                        if(forceOneLine) {
+                            format.noindent();
+                        } else {
+                            format.indent(indent);
+                        }
+                        return format.toText();
+                    } catch(Exception e) {
+                        return "unable to read body content " + e;
+                    }
+                };
+            }
+
+        }
+
+        /**
+         * Helper class for xml to string formatter.
+         */
+        public static class Xml {
+            private InputStream is;
+            private String encoding = "utf-9";
+            private String indent;
+            private boolean forceOneLine;
+            private int cutStringLiterals;
+
+            /**
+             * define input for converter
+             * @param is
+             * @return this
+             */
+            public static Xml input(InputStream is) { Xml json = new Xml(); json.is = is; return json; }
+            /**
+             * define encoding of input (default is utf-8)
+             * @param value encoding like utf-8
+             * @return this
+             */
+            public Xml encoding(String value) { this.encoding = value; return this; }
+            /**
+             * define indendation string if result must be indended
+             * @param value like "  "
+             * @return this
+             */
+            public Xml indent(String value) { this.indent = value; return this; }
+            /**
+             * true if result must be formatted to one line
+             * @param value
+             * @return this
+             */
+            public Xml forceOneLine(boolean value) { this.forceOneLine = value; return this; }
+            /**
+             * if literals are greater than specified value they vill be cuted. (default 0 - no cutting)
+             * @param value
+             * @return this
+             */
+            public Xml cutStringLiterals(int value) { this.cutStringLiterals = value; return this; }
+            /**
+             * Create formatter.
+             * @return formatter
+             */
+            public Function<InputStream, String> format() {
+                return inputStream -> {
+                    try {
+                        XmlFormat format = XmlFormat.instance(readTextFromStream(is, encoding), 2000);
+                        if(cutStringLiterals > 0) format.cutStringLiterals(cutStringLiterals);
+                        if(forceOneLine) {
+                            format.forceoneline();
+                        } else {
+                            format.indent(indent);
+                        }
+                        return format.format();
+                    } catch(Exception e) {
+                        return "unable to read body content " + e;
+                    }
+                };
+            }
+
+        }
+
+    }
+
+    private static String readTextFromStream(InputStream is, String encoding) {
+        try {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            int nRead;
+            byte[] data = new byte[1024];
+            while ((nRead = is.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+
+            buffer.flush();
+            byte[] byteArray = buffer.toByteArray();
+
+            String text = new String(byteArray, encoding);
+            return text;
+        } catch(Exception e) {
+            return "unable to read body content " + e;
+        }
+    }
 }

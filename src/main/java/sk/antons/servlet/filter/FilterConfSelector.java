@@ -38,4 +38,12 @@ public class FilterConfSelector {
     public FilterConfSelector requestCondition(Condition<HttpServletRequest> value) { this.requestCondition = value; return this; }
     public FilterConfSelector responseCondition(Condition<HttpServletResponse> value) { this.responseCondition = value; return this; }
 
+    public String configurationInfo() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n---- case -------");
+        if(requestCondition != null) sb.append("\n  when request: ").append(requestCondition);
+        if(responseCondition != null) sb.append("\n  when response: ").append(responseCondition);
+        if(conf != null) sb.append("\n  do: ").append(conf);
+        return sb.toString();
+    }
 }

@@ -28,14 +28,17 @@ public class StringCondition<T> implements Condition<T> {
     Function<T, String> resolver;
     String param;
     Operation operation;
+    String name;
 
-    public StringCondition(Operation operation, String param, Function<T, String> resolver) {
+    public StringCondition(Operation operation, String param, Function<T, String> resolver, String name) {
         this.operation = operation;
         this.param = param;
         this.resolver = resolver;
+        this.name = name;
     }
 
-    public static <W> StringCondition<W> instance(Operation operation, String param, Function<W, String> resolver) { return new StringCondition(operation, param, resolver); }
+    public static <W> StringCondition<W> instance(Operation operation, String param, Function<W, String> resolver) { return new StringCondition(operation, param, resolver, "?"); }
+    public static <W> StringCondition<W> instance(Operation operation, String param, Function<W, String> resolver, String name) { return new StringCondition(operation, param, resolver, name); }
 
     @Override
     public boolean check(T request) {
@@ -50,6 +53,8 @@ public class StringCondition<T> implements Condition<T> {
             return (value != null) && (value.length() != 0);
         } else if(operation == Operation.EQUALS) {
             return (value != null) && (value.equals(param));
+        } else if(operation == Operation.EQUALS_IGNORE_CASE) {
+            return (value != null) && (value.equalsIgnoreCase(param));
         } else if(operation == Operation.STARTS_WITH) {
             return (value != null) && (value.startsWith(param));
         } else if(operation == Operation.ENDS_WITH) {
@@ -69,12 +74,15 @@ public class StringCondition<T> implements Condition<T> {
 
     @Override
     public String toString() {
-        return operation + "(" + param + ")";
+        return name + "->" + operation.displayName + "(" + (param == null?"":param) + ")";
     }
 
     public static enum Operation {
-        EXISTS, EQUALS, STARTS_WITH, ENDS_WITH, CONTAINS,
-        MATCH, REGEXP
+        EXISTS("exists"), EQUALS("eq"), STARTS_WITH("starts"), ENDS_WITH("ends")
+        , CONTAINS("contains"), MATCH("match"), REGEXP("regexp")
+        , EQUALS_IGNORE_CASE("eqic")
         ;
+        private String displayName;
+        private Operation(String displayName) { this.displayName = displayName; }
     }
 }

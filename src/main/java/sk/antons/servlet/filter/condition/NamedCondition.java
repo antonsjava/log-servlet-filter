@@ -15,33 +15,29 @@
  */
 package sk.antons.servlet.filter.condition;
 
-import java.util.function.Predicate;
-
 /**
  *
  * @author antons
  */
-public class AnyCondition<T> implements Condition<T> {
+public class NamedCondition<T> implements Condition<T> {
 
-    Predicate<T> resolver;
+    Condition<T> condition;
     String name;
 
-    public AnyCondition(Predicate<T> resolver, String name) {
-        this.resolver = resolver;
+    public NamedCondition(Condition<T> condition, String name) {
+        this.condition = condition;
         this.name = name;
     }
 
-    public static <W> AnyCondition<W> instance(Predicate<W> resolver) { return new AnyCondition(resolver, "??"); }
-    public static <W> AnyCondition<W> instance(Predicate<W> resolver, String name) { return new AnyCondition(resolver, name); }
+    public static <W> NamedCondition<W> instance(Condition<W> condition, String name) { return new NamedCondition(condition, name); }
 
     @Override
     public boolean check(T request) {
-        return resolver.test(request);
+        return condition.check(request);
     }
 
     @Override
     public String toString() {
-        return "( " + name + " )";
+        return name;
     }
-
 }
