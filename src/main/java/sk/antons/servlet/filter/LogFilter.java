@@ -375,7 +375,6 @@ public class LogFilter implements Filter {
 
             /**
              * define input for converter
-             * @param is
              * @return this
              */
             public static Json instance() { return new Json(); }
@@ -437,7 +436,6 @@ public class LogFilter implements Filter {
 
             /**
              * define input for converter
-             * @param is
              * @return this
              */
             public static Xml instance() { return new Xml(); }
