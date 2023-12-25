@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.function.Consumer;
 import sk.antons.servlet.filter.condition.Condition;
 import sk.antons.servlet.filter.condition.ConditionBuilder;
+import sk.antons.servlet.filter.condition.ConstCondition;
 import sk.antons.servlet.filter.condition.NamedCondition;
 
 /**
@@ -66,6 +67,7 @@ public class ResponseConditionBuilder<C> {
     public ResponseConditionBuilder<C> rb() { builder.rb(); return this; }
 
     public ResponseConditionBuilder<C> statusOK() { builder.add(NamedCondition.instance(r -> r.getStatus() < 300, "response.statusOK")); return this; }
+    public ResponseConditionBuilder<C> any() { builder.add(ConstCondition.instance(true)); return this; }
 
     public StringConditionBuilder<ResponseConditionBuilder<C>, HttpServletResponse> status() { return StringConditionBuilder.instance(this, r -> "" + r.getStatus(), c -> builder.add(c), "request.status"); }
     public StringConditionBuilder<ResponseConditionBuilder<C>, HttpServletResponse> header(final String key) { return StringConditionBuilder.instance(this, r -> r.getHeader(key), c -> builder.add(c), "request.header["+key+"]"); }
