@@ -31,6 +31,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import sk.antons.servlet.filter.builder.LogFilterBuilder;
 import sk.antons.servlet.util.HttpServletRequestWrapper;
 import sk.antons.servlet.util.HttpServletResponseWrapper;
 import sk.antons.servlet.util.JsonFormat;
@@ -268,7 +269,7 @@ public class LogFilter implements Filter {
 
     /**
      * Filter configuration info
-     * @return
+     * @return configuration info
      */
     public String configurationInfo() {
         StringBuilder sb = new StringBuilder();
@@ -277,6 +278,12 @@ public class LogFilter implements Filter {
         }
         return sb.toString();
     }
+
+    /**
+     * Builder for log filter
+     * @return builder
+     */
+    public static LogFilterBuilder builder() { return LogFilterBuilder.instance(); }
 
     /**
      * Helper class for default HttpHeaders convertors.
