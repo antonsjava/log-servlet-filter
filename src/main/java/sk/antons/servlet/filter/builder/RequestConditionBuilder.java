@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.function.Consumer;
 import sk.antons.servlet.filter.condition.Condition;
 import sk.antons.servlet.filter.condition.ConditionBuilder;
+import sk.antons.servlet.filter.condition.ConstCondition;
 
 /**
  * Request condition builder.
@@ -81,4 +82,7 @@ public class RequestConditionBuilder<C> {
     public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> uri() { return StringConditionBuilder.instance(this, r -> r.getRequestURI(), c -> builder.add(c), "request.uri"); }
     public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> schema() { return StringConditionBuilder.instance(this, r -> r.getScheme(), c -> builder.add(c), "request.schema"); }
     public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> servletPath() { return StringConditionBuilder.instance(this, r -> r.getServletPath(), c -> builder.add(c), "request.servletPath"); }
+
+    public RequestConditionBuilder<C> any() { builder.add(ConstCondition.instance(true)); return this; }
+
 }

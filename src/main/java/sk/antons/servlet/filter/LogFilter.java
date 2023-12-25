@@ -368,7 +368,6 @@ public class LogFilter implements Filter {
          * Helper class for json to string formatter.
          */
         public static class Json {
-            private InputStream is;
             private String encoding = "utf-9";
             private String indent;
             private boolean forceOneLine;
@@ -379,7 +378,7 @@ public class LogFilter implements Filter {
              * @param is
              * @return this
              */
-            public static Json input(InputStream is) { Json json = new Json(); json.is = is; return json; }
+            public static Json instance() { return new Json(); }
             /**
              * define encoding of input (default is utf-8)
              * @param value encoding like utf-8
@@ -411,7 +410,7 @@ public class LogFilter implements Filter {
             public Function<InputStream, String> format() {
                 return inputStream -> {
                     try {
-                        JsonFormat format = JsonFormat.from(new InputStreamReader(is, encoding));
+                        JsonFormat format = JsonFormat.from(new InputStreamReader(inputStream, encoding));
                         if(cutStringLiterals > 0) format.cutStringLiterals(cutStringLiterals);
                         if(forceOneLine) {
                             format.noindent();
@@ -431,7 +430,6 @@ public class LogFilter implements Filter {
          * Helper class for xml to string formatter.
          */
         public static class Xml {
-            private InputStream is;
             private String encoding = "utf-9";
             private String indent;
             private boolean forceOneLine;
@@ -442,7 +440,7 @@ public class LogFilter implements Filter {
              * @param is
              * @return this
              */
-            public static Xml input(InputStream is) { Xml json = new Xml(); json.is = is; return json; }
+            public static Xml instance() { return new Xml(); }
             /**
              * define encoding of input (default is utf-8)
              * @param value encoding like utf-8
@@ -474,7 +472,7 @@ public class LogFilter implements Filter {
             public Function<InputStream, String> format() {
                 return inputStream -> {
                     try {
-                        XmlFormat format = XmlFormat.instance(readTextFromStream(is, encoding), 2000);
+                        XmlFormat format = XmlFormat.instance(readTextFromStream(inputStream, encoding), 2000);
                         if(cutStringLiterals > 0) format.cutStringLiterals(cutStringLiterals);
                         if(forceOneLine) {
                             format.forceoneline();
