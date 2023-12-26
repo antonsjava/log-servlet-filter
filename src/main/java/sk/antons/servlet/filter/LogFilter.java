@@ -120,7 +120,7 @@ public class LogFilter implements Filter {
         try {
             if (conf.messageConsumerEnabled().getAsBoolean()) {
                 requestData(request, conf, pathbuff, requestheaderbuff, requestpayloadbuff);
-                if((conf.requestStartPrefix() != null) && (selector.responseCondition() != null)) {
+                if((conf.requestStartPrefix() != null) && (selector.responseCondition() == null)) {
                     StringBuilder sb = new StringBuilder();
                     sb.append(conf.requestStartPrefix())
                         .append('[').append(id).append(']')
