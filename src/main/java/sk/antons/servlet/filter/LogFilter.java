@@ -368,7 +368,7 @@ public class LogFilter implements Filter {
          * Helper class for json to string formatter.
          */
         public static class Json {
-            private String encoding = "utf-9";
+            private String encoding = "utf-8";
             private String indent;
             private boolean forceOneLine;
             private int cutStringLiterals;
@@ -429,7 +429,7 @@ public class LogFilter implements Filter {
          * Helper class for xml to string formatter.
          */
         public static class Xml {
-            private String encoding = "utf-9";
+            private String encoding = "utf-8";
             private String indent;
             private boolean forceOneLine;
             private int cutStringLiterals;
