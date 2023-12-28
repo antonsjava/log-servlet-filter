@@ -230,7 +230,7 @@ public class LogFilter implements Filter {
         if(conf.requestPayloadFormatter() != null) {
             String text = null;
             try {
-                text = conf.requestPayloadFormatter().apply(request.getInputStream());
+                if(request.getInputStream() != null) text = conf.requestPayloadFormatter().apply(request.getInputStream());
             } catch(Exception e) {
                 text = "unable to read payload "+e;
             }
@@ -255,7 +255,7 @@ public class LogFilter implements Filter {
         if(conf.responsePayloadFormatter() != null) {
             String text = null;
             try {
-                text = conf.responsePayloadFormatter().apply(response.getContentInputStream());
+                if(response.getContentInputStream() != null) text = conf.responsePayloadFormatter().apply(response.getContentInputStream());
             } catch(Exception e) {
                 text = "unable to read payload "+e;
             }

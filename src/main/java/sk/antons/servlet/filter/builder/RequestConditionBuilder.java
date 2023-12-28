@@ -66,7 +66,7 @@ public class RequestConditionBuilder<C> {
     public RequestConditionBuilder<C> lb() { builder.lb(); return this; }
     public RequestConditionBuilder<C> rb() { builder.rb(); return this; }
 
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> path() { return StringConditionBuilder.instance(this, r -> r.getPathInfo(), c -> builder.add(c), "request.path"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> path() { return StringConditionBuilder.instance(this, r -> r.getRequestURI()+ r.getPathInfo(), c -> builder.add(c), "request.path"); }
     public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> method() { return StringConditionBuilder.instance(this, r -> r.getMethod(), c -> builder.add(c), "request.method"); }
     public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> header(final String key) { return StringConditionBuilder.instance(this, r -> r.getHeader(key), c -> builder.add(c), "request.header["+key+"]"); }
     public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> param(final String key) { return StringConditionBuilder.instance(this, r -> r.getParameter(key), c -> builder.add(c), "request.param["+key+"]"); }
@@ -82,6 +82,7 @@ public class RequestConditionBuilder<C> {
     public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> uri() { return StringConditionBuilder.instance(this, r -> r.getRequestURI(), c -> builder.add(c), "request.uri"); }
     public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> schema() { return StringConditionBuilder.instance(this, r -> r.getScheme(), c -> builder.add(c), "request.schema"); }
     public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> servletPath() { return StringConditionBuilder.instance(this, r -> r.getServletPath(), c -> builder.add(c), "request.servletPath"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> pathInfo() { return StringConditionBuilder.instance(this, r -> r.getPathInfo(), c -> builder.add(c), "request.servletPath"); }
 
     public RequestConditionBuilder<C> any() { builder.add(ConstCondition.instance(true)); return this; }
 
