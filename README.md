@@ -103,14 +103,33 @@ LogFilter for each request try to find first triplet which fulfil conditions and
  - you can use any() condition - means always true
  - you can use statusOK() condition - status is 2xx
  - you can use several response string conditions in format resolveStringFromRequest().applyStringConditoon() (like .path().contains("boo"))
- - you can combine conditoons with not(), or(), and(). lb(), rb() (lb and rb are brackets)
+ - you can combine conditions with not(), or(), and(). lb(), rb() (lb and rb are brackets)
 
 If you define response condition
 
- - filter will not print restest start message 
- - filter must process request data even message is not displayed - because response must be evaluated fisrt
+ - filter will not print request start message 
+ - filter must process request data even message is not displayed - because response must be evaluated first to know if message must be printed
 
 So use them only of you really need it and with combination with request condition. 
+
+### output configuration
+
+Each triplet has own configuration it is based on default configuration. You can define
+
+ - reset() - used to reset actual state of configuration (You can remove default settings in that way)
+ - doNothing() - if this is set to true - no output is produced
+ - messageConsumer() - function which really prints message (like m -> log.debug(m))
+ - messageConsumerEnabled() - function which determine if logging is enabled (like () -> log.isDebugEnabled()) 
+ - requestStartPrefix() - prefix for request start message (default REQ) (if it is null request start message is not printed) 
+ - requestPrefix() - prefix for request message (default REQ) (if it is null request message is not printed) 
+ - responsePrefix() - prefix for response message (default RES) (if it is null response message is not printed) 
+ - identity() - prncipal name is printed if it is set to true 
+ - requestHeaderFormatter() - function to format request header (default is null) (if it is null no info is printed) There are provided LogFilter.Headers.all() and LogFilter.Headers.listed("name1", "name2") functions.  
+ - requestPayloadFormatter() - function to format request body (default is null) (if it is null no info is printed) There are provided LogFilter.Body.asIs(), LogFilter.Body.Json and LogFilter.Body.Xml functions. For json and xml it is possible to force oneline format of trim long literals.
+ - responseHeaderFormatter() - function to format response header (default is null) (if it is null no info is printed) There are provided LogFilter.Headers.all() and LogFilter.Headers.listed("name1", "name2") functions.  
+ - responsePayloadFormatter() - function to format response body (default is null) (if it is null no info is printed) There are provided LogFilter.Body.asIs(), LogFilter.Body.Json and LogFilter.Body.Xml functions. For json and xml it is possible to force oneline format of trim long literals.
+
+
 
 ## Maven usage
 
