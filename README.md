@@ -8,8 +8,8 @@ in configuration which I'm not able to implement in original project.
 
 There are two main branches 
 
- - 2.x  - javax version
- - 3.x  - jakarta version
+ - [2.x](https://github.com/antonsjava/log-servlet-filter/tree/v2?tab=readme-ov-file)  - javax version
+ - [3.x](https://github.com/antonsjava/log-servlet-filter/tree/v3?tab=readme-ov-file)  - jakarta version
 
 API is same in both branches 
 
