@@ -131,6 +131,47 @@ Each triplet has own configuration it is based on default configuration. You can
 
 
 
+## usage
+
+[Here](https://github.com/antonsjava/sb-sampler/blob/main/src/main/java/sk/antons/sbsampler/rest/RestConf.java#L40) is example of not so real usage. 
+
+I usually use it in following way 
+
+ - for path prefix /actatpr doNothing(true)
+ - for path prefix (or path prefix and method) where result is binary - do not print payload
+ - for any format body output to json one line and cut literals to 200 (longer literals are usually some binary data in json)
+
+~~~
+ LogFilter filter = LogFilter.builder()
+     .defaultConf()
+         .messageConsumer(message -> log.info(message))
+         .messageConsumerEnabled(() -> log.isInfoEnabled())
+         .done()
+     .inCase() // ignore actuator
+         .request()
+             .path().startsWith("/actuator/")
+             .done()
+         .conf()
+             .doNothing(true)
+             .done()
+         .done()
+     .inCase() // just simple line no headers no body
+         .request()
+             .path().endsWith("/export").and().method().equals("GET")
+             .done()
+         .done()
+     .inCase() // log as jsons
+         .request()
+             .any()
+             .done()
+         .conf()
+             .requestPayloadFormatter(LogFilter.Body.Json.instance().forceOneLine(true).cutStringLiterals(200).format())
+             .responsePayloadFormatter(LogFilter.Body.Json.instance().forceOneLine(true).cutStringLiterals(200).format())
+             .done()
+         .done()
+     .build();
+~~~
+
 ## Maven usage
 
 ```
