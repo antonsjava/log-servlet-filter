@@ -76,6 +76,42 @@ In general it contains
  - payload info (in example 'payload[1703929952718] size: 13'). Request body info. Present only if configured (You must specify body formatter).
 
 
+## Configuration
+
+In spring boot you only create bean of type LogFilter.
+
+LogFilter is configured as list of triplets. 
+ 
+ - request condition
+ - response condition (if this is defined no start request message is displayed and filter processing is done even message is not displayed because of condition)
+ - output configuration
+
+LogFilter for each request try to find first triplet which fulfil conditions and make output using that configuration. 
+
+### request condition
+
+ - you can build condition exactly as you write condition on paper like path().startsWith("/public").and().method().equals("POST")
+ - you can use custom condition - you can define your own condition
+ - you can use any() condition - means always true
+ - you can use several request string conditions in format resolveStringFromRequest().applyStringConditoon() (like .path().contains("boo"))
+ - you can combine conditoons with not(), or(), and(). lb(), rb() (lb and rb are brackets)
+
+### response condition
+
+ - you can build condition exactly as you write condition on paper like path().startsWith("/public").and().method().equals("POST")
+ - you can use custom condition - you can define your own condition
+ - you can use any() condition - means always true
+ - you can use statusOK() condition - status is 2xx
+ - you can use several response string conditions in format resolveStringFromRequest().applyStringConditoon() (like .path().contains("boo"))
+ - you can combine conditoons with not(), or(), and(). lb(), rb() (lb and rb are brackets)
+
+If you define response condition
+
+ - filter will not print restest start message 
+ - filter must process request data even message is not displayed - because response must be evaluated fisrt
+
+So use them only of you really need it and with combination with request condition. 
+
 ## Maven usage
 
 ```
