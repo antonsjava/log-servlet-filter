@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -365,6 +366,101 @@ public class LogFilter implements Filter {
         }
 
         /**
+         * Converts body payload as string with custom string formatter.
+         * (just converts input stream tp strimg and apply formatter )
+         * @param formatter - custom string formatter
+         * @return is to string converter
+         */
+        public static Function<InputStream, String> simple(Function<String, String> formatter) {
+            return inputStream -> {
+                String text = readTextFromStream(inputStream, "utf-8");
+                return formatter.apply(text);
+            };
+        }
+
+        /**
+         * Converts body payload as string with custom string formatter.
+         * (just converts input stream tp strimg and apply formatter )
+         * @param encoding
+         * @param formatter - custom string formatter
+         * @return is to string converter
+         */
+        public static Function<InputStream, String> simple(String encoding, Function<String, String> formatter) {
+            return inputStream -> {
+                String text = readTextFromStream(inputStream, encoding);
+                return formatter.apply(text);
+            };
+        }
+
+        /**
+         * Helper class for text to string formatter.
+         */
+        public static class AsIs {
+            private String encoding = "utf-8";
+            private String newlineReplacer;
+            private int cutTo;
+
+            /**
+             * define input for converter
+             * @return this
+             */
+            public static AsIs instance() { return new AsIs(); }
+            /**
+             * define encoding of input (default is utf-8)
+             * @param value encoding like utf-8
+             * @return this
+             */
+            public AsIs encoding(String value) { this.encoding = value; return this; }
+            /**
+             * define replacement for newline
+             * @param value like " "
+             * @return this
+             */
+            public AsIs newlineReplacer(String value) { this.newlineReplacer = value; return this; }
+            /**
+             * true if result must be formatted to one line (newline is replaced by space)
+             * @param value
+             * @return this
+             */
+            public AsIs forceOneLine(boolean value) { this.newlineReplacer = (value ? " " : null); return this; }
+            /**
+             * if text length is greater than specified value it will be culted. (default 0 - no cutting)
+             * @param value
+             * @return this
+             */
+            public AsIs cutTo(int value) { this.cutTo = value; return this; }
+            /**
+             * Create formatter.
+             * @return formatter
+             */
+            public Function<InputStream, String> format() {
+                return inputStream -> {
+                    try {
+                        Reader reader = new InputStreamReader(inputStream, encoding);
+                        StringBuilder sb = new StringBuilder(4096);
+                        int index = 0;
+                        int c;
+                        while ((c = reader.read()) != -1) {
+                            if((cutTo > 0) && (index++ > cutTo)) {
+                                sb.append("...");
+                                break;
+                            }
+                            if((newlineReplacer != null) && (c == '\n')) {
+                                sb.append(newlineReplacer);
+                            } else {
+                                sb.append((char)c);
+                            }
+                        }
+                        return sb.toString();
+                    } catch(Exception e) {
+                        return "unable to read body content " + e;
+                    }
+                };
+            }
+
+        }
+
+        /**
          * Helper class for json to string formatter.
          */
         public static class Json {
@@ -397,7 +493,7 @@ public class LogFilter implements Filter {
              */
             public Json forceOneLine(boolean value) { this.forceOneLine = value; return this; }
             /**
-             * if literals are greater than specified value they vill be cuted. (default 0 - no cutting)
+             * if literals are greater than specified value they will be cutted. (default 0 - no cutting)
              * @param value
              * @return this
              */
@@ -458,7 +554,7 @@ public class LogFilter implements Filter {
              */
             public Xml forceOneLine(boolean value) { this.forceOneLine = value; return this; }
             /**
-             * if literals are greater than specified value they vill be cuted. (default 0 - no cutting)
+             * if literals are greater than specified value they will be cutted. (default 0 - no cutting)
              * @param value
              * @return this
              */
