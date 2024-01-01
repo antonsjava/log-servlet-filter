@@ -66,23 +66,23 @@ public class RequestConditionBuilder<C> {
     public RequestConditionBuilder<C> lb() { builder.lb(); return this; }
     public RequestConditionBuilder<C> rb() { builder.rb(); return this; }
 
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> path() { return StringConditionBuilder.instance(this, r -> r.getRequestURI()+ r.getPathInfo(), c -> builder.add(c), "request.path"); }
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> method() { return StringConditionBuilder.instance(this, r -> r.getMethod(), c -> builder.add(c), "request.method"); }
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> header(final String key) { return StringConditionBuilder.instance(this, r -> r.getHeader(key), c -> builder.add(c), "request.header["+key+"]"); }
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> param(final String key) { return StringConditionBuilder.instance(this, r -> r.getParameter(key), c -> builder.add(c), "request.param["+key+"]"); }
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> contentType() { return StringConditionBuilder.instance(this, r -> r.getContentType(), c -> builder.add(c), "request.contentType"); }
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> contextPath() { return StringConditionBuilder.instance(this, r -> r.getContextPath(), c -> builder.add(c), "request.contextPath"); }
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> localAddr() { return StringConditionBuilder.instance(this, r -> r.getLocalAddr(), c -> builder.add(c), "request.localAddr"); }
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> localName() { return StringConditionBuilder.instance(this, r -> r.getLocalName(), c -> builder.add(c), "request.localName"); }
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> pathTranslated() { return StringConditionBuilder.instance(this, r -> r.getPathTranslated(), c -> builder.add(c), "request.pathTranslated"); }
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> queryString() { return StringConditionBuilder.instance(this, r -> r.getQueryString(), c -> builder.add(c), "request.queryString"); }
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> remoteAddr() { return StringConditionBuilder.instance(this, r -> r.getRemoteAddr(), c -> builder.add(c), "request.remoteAddr"); }
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> remoteHost() { return StringConditionBuilder.instance(this, r -> r.getRemoteHost(), c -> builder.add(c), "request.remoteHost"); }
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> remoteUser() { return StringConditionBuilder.instance(this, r -> r.getRemoteUser(), c -> builder.add(c), "request.remoteUser"); }
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> uri() { return StringConditionBuilder.instance(this, r -> r.getRequestURI(), c -> builder.add(c), "request.uri"); }
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> schema() { return StringConditionBuilder.instance(this, r -> r.getScheme(), c -> builder.add(c), "request.schema"); }
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> servletPath() { return StringConditionBuilder.instance(this, r -> r.getServletPath(), c -> builder.add(c), "request.servletPath"); }
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> pathInfo() { return StringConditionBuilder.instance(this, r -> r.getPathInfo(), c -> builder.add(c), "request.servletPath"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> path() { return StringConditionBuilder.instance(this, r -> r.getRequestURI()+ r.getPathInfo(), c -> builder.add(c), "path"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> method() { return StringConditionBuilder.instance(this, r -> r.getMethod(), c -> builder.add(c), "method"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> header(final String key) { return StringConditionBuilder.instance(this, r -> r.getHeader(key), c -> builder.add(c), "header["+key+"]"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> param(final String key) { return StringConditionBuilder.instance(this, r -> r.getParameter(key), c -> builder.add(c), "param["+key+"]"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> contentType() { return StringConditionBuilder.instance(this, r -> r.getContentType(), c -> builder.add(c), "contentType"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> contextPath() { return StringConditionBuilder.instance(this, r -> r.getContextPath(), c -> builder.add(c), "contextPath"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> localAddr() { return StringConditionBuilder.instance(this, r -> r.getLocalAddr(), c -> builder.add(c), "localAddr"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> localName() { return StringConditionBuilder.instance(this, r -> r.getLocalName(), c -> builder.add(c), "localName"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> pathTranslated() { return StringConditionBuilder.instance(this, r -> r.getPathTranslated(), c -> builder.add(c), "pathTranslated"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> queryString() { return StringConditionBuilder.instance(this, r -> r.getQueryString(), c -> builder.add(c), "queryString"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> remoteAddr() { return StringConditionBuilder.instance(this, r -> r.getRemoteAddr(), c -> builder.add(c), "remoteAddr"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> remoteHost() { return StringConditionBuilder.instance(this, r -> r.getRemoteHost(), c -> builder.add(c), "remoteHost"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> remoteUser() { return StringConditionBuilder.instance(this, r -> r.getRemoteUser(), c -> builder.add(c), "remoteUser"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> uri() { return StringConditionBuilder.instance(this, r -> r.getRequestURI(), c -> builder.add(c), "uri"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> schema() { return StringConditionBuilder.instance(this, r -> r.getScheme(), c -> builder.add(c), "schema"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> servletPath() { return StringConditionBuilder.instance(this, r -> r.getServletPath(), c -> builder.add(c), "servletPath"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> pathInfo() { return StringConditionBuilder.instance(this, r -> r.getPathInfo(), c -> builder.add(c), "servletPath"); }
 
     public RequestConditionBuilder<C> any() { builder.add(ConstCondition.instance(true)); return this; }
 

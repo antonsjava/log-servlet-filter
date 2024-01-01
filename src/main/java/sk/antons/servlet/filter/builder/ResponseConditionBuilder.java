@@ -66,7 +66,7 @@ public class ResponseConditionBuilder<C> {
     public ResponseConditionBuilder<C> lb() { builder.lb(); return this; }
     public ResponseConditionBuilder<C> rb() { builder.rb(); return this; }
 
-    public ResponseConditionBuilder<C> statusOK() { builder.add(NamedCondition.instance(r -> r.getStatus() < 300, "response.statusOK")); return this; }
+    public ResponseConditionBuilder<C> statusOK() { builder.add(NamedCondition.instance(r -> r.getStatus() < 300, "statusOK")); return this; }
     public ResponseConditionBuilder<C> any() { builder.add(ConstCondition.instance(true)); return this; }
 
     public StringConditionBuilder<ResponseConditionBuilder<C>, HttpServletResponse> status() { return StringConditionBuilder.instance(this, r -> "" + r.getStatus(), c -> builder.add(c), "request.status"); }
