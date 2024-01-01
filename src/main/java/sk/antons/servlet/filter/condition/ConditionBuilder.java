@@ -62,7 +62,6 @@ public class ConditionBuilder<C> {
 
     public ConditionBuilder<C> or() {
         path.append(" or");
-        System.out.println(" --stack " + stack);
         if(stack.peek().condition == null) throw new IllegalStateException("bad condition format at " + path);
         stack.push(StackEntry.of(Type.Or));
         return this;
