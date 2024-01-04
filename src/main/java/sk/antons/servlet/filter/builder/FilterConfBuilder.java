@@ -98,6 +98,18 @@ public class FilterConfBuilder<C> {
      */
     public FilterConfBuilder<C> identity(boolean value) { this.conf.identity(value); return this; }
     /**
+     * Add remote addr  to request info
+     * @param value true if remote addr should be displayed
+     * @return this
+     */
+    public FilterConfBuilder<C> remoteAddr(boolean value) { this.conf.remoteAddr(value); return this; }
+    /**
+     * Add remote host to request info
+     * @param value true if remote addr should be displayed
+     * @return this
+     */
+    public FilterConfBuilder<C> remoteHost(boolean value) { this.conf.remoteHost(value); return this; }
+    /**
      * Do not log anything.
      * @param value true if no logging must be done
      * @return this

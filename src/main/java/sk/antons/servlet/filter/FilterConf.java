@@ -33,6 +33,8 @@ public class FilterConf implements Cloneable {
     private String requestPrefix = "REQ";
     private String responsePrefix = "RES";
     private boolean identity = false;
+    private boolean remoteHost = false;
+    private boolean remoteAddr = false;
     private boolean doNothing = false;
     private Function<HeadersWrapper, String> requestHeaderFormatter;
     private Function<InputStream, String> requestPayloadFormatter;
@@ -45,6 +47,8 @@ public class FilterConf implements Cloneable {
     public String requestPrefix() { return requestPrefix; }
     public String responsePrefix() { return responsePrefix; }
     public boolean identity() { return identity; }
+    public boolean remoteAddr() { return remoteAddr; }
+    public boolean remoteHost() { return remoteHost; }
     public boolean doNothing() { return doNothing; }
     public Function<HeadersWrapper, String> requestHeaderFormatter() { return requestHeaderFormatter; }
     public Function<InputStream, String> requestPayloadFormatter() { return requestPayloadFormatter; }
@@ -93,6 +97,18 @@ public class FilterConf implements Cloneable {
      */
     public FilterConf identity(boolean value) { this.identity = value; return this; }
     /**
+     * Add remoteHost to request info
+     * @param value true if remoteHost should be displayed
+     * @return this
+     */
+    public FilterConf remoteHost(boolean value) { this.remoteHost = value; return this; }
+    /**
+     * Add remoteAddr to request info
+     * @param value true if remoteHost should be displayed
+     * @return this
+     */
+    public FilterConf remoteAddr(boolean value) { this.remoteAddr = value; return this; }
+    /**
      * Do not log anything.
      * @param value true if no logging must be done
      * @return this
@@ -138,6 +154,8 @@ public class FilterConf implements Cloneable {
         sb.append("[");
         sb.append("enabled=").append(messageConsumerEnabled.getAsBoolean());
         if(identity) sb.append(", identity");
+        if(remoteAddr) sb.append(", addr");
+        if(remoteHost) sb.append(", host");
         if(requestStartPrefix != null) sb.append(", requestStartPrefix=").append(requestStartPrefix);
         if(requestPrefix != null) sb.append(", requestPrefix=").append(requestPrefix);
         if(requestHeaderFormatter != null) sb.append(", requestHeader");

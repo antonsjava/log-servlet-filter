@@ -220,6 +220,12 @@ public class LogFilter implements Filter {
             }
             requestheaderbuff.append(")");
         }
+        if(conf.remoteAddr()&& (httprequest != null)) {
+            requestheaderbuff.append(" addr(").append(httprequest.getRemoteAddr()).append(")");
+        }
+        if(conf.remoteHost()&& (httprequest != null)) {
+            requestheaderbuff.append(" host(").append(httprequest.getRemoteHost()).append(")");
+        }
         if((conf.requestHeaderFormatter()!= null) && (httprequest != null)) {
             HeadersWrapper headers = HeadersWrapper.instance(httprequest);
             requestheaderbuff.append(' ').append(request.getProtocol());
