@@ -35,7 +35,35 @@ public class ConditionBuilder<C> {
     public Condition<C> condition() {
         if(stack.size() != 1) throw new IllegalStateException("bad condition format at " + path);
         if(stack.peek().condition == null) throw new IllegalStateException("bad condition format at " + path);
-        return (Condition<C>)stack.peek().condition;
+        return rebalance((Condition<C>)stack.peek().condition);
+    }
+
+    // mahke sure that combinations od and/or conditions will be evaluated from left to right
+    private static <X> Condition<X> rebalance(Condition<X> condition) {
+        if(condition == null) {
+            return condition;
+        } else if(condition instanceof NotCondition ) {
+            NotCondition<X> cnd = (NotCondition<X>)condition;
+            return NotCondition.instance(rebalance(cnd.right));
+        } else if(condition instanceof OrCondition ) {
+            OrCondition<X> cnd = (OrCondition<X>)condition;
+            if(cnd.left instanceof OrCondition) {
+                OrCondition<X> cndleft = (OrCondition<X>)cnd.left;
+                return rebalance(OrCondition.instance(cndleft.left, OrCondition.instance(cndleft.right, cnd.right)));
+            } else {
+                return OrCondition.instance(rebalance(cnd.left), rebalance(cnd.right));
+            }
+        } else if(condition instanceof AndCondition ) {
+            AndCondition<X> cnd = (AndCondition<X>)condition;
+            if(cnd.left instanceof AndCondition) {
+                AndCondition<X> cndleft = (AndCondition<X>)cnd.left;
+                return rebalance(AndCondition.instance(cndleft.left, AndCondition.instance(cndleft.right, cnd.right)));
+            } else {
+                return AndCondition.instance(rebalance(cnd.left), rebalance(cnd.right));
+            }
+        } else {
+            return condition;
+        }
     }
 
     public ConditionBuilder<C> add(Condition<C> condition) {

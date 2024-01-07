@@ -16,6 +16,8 @@
 package sk.antons.servlet.filter.condition;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 import org.junit.Assert;
 import org.junit.Test;
@@ -43,6 +45,24 @@ public class ConditionBuilderTest {
         Assert.assertNotNull(conditon);
         Assert.assertTrue(conditon.check("pokus"));
         Assert.assertFalse(conditon.check("pokuspokus"));
+    }
+
+    @Test
+	public void rebalancetest() throws Exception {
+        final List<Integer> order = new ArrayList<>();
+        Condition<String> conditon = ConditionBuilder.instance(String.class)
+            .add(NamedCondition.instance(s -> {order.add(1); return true;}, "111"))
+            .and().add(NamedCondition.instance(s -> {order.add(2); return true;}, "222"))
+            .and().add(NamedCondition.instance(s -> {order.add(3); return true;}, "333"))
+            .and().add(NamedCondition.instance(s -> {order.add(4); return true;}, "444"))
+            .condition();
+        System.out.println(" rebalancetest: " + conditon);
+        Assert.assertNotNull(conditon);
+        Assert.assertTrue(conditon.check("pokuspokus"));
+        System.out.println(" rebalancetest result: " + order);
+        Assert.assertEquals(1, order.get(0).intValue());
+        Assert.assertEquals(2, order.get(1).byteValue());
+        Assert.assertEquals(3, order.get(2).intValue());
     }
 
 }
