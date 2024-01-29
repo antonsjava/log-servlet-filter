@@ -66,7 +66,7 @@ public class RequestConditionBuilder<C> {
     public RequestConditionBuilder<C> lb() { builder.lb(); return this; }
     public RequestConditionBuilder<C> rb() { builder.rb(); return this; }
 
-    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> path() { return StringConditionBuilder.instance(this, r -> r.getRequestURI()+ r.getPathInfo(), c -> builder.add(c), "path"); }
+    public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> path() { return StringConditionBuilder.instance(this, r -> r.getRequestURI(), c -> builder.add(c), "path"); }
     public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> method() { return StringConditionBuilder.instance(this, r -> r.getMethod(), c -> builder.add(c), "method"); }
     public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> header(final String key) { return StringConditionBuilder.instance(this, r -> r.getHeader(key), c -> builder.add(c), "header["+key+"]"); }
     public StringConditionBuilder<RequestConditionBuilder<C>, HttpServletRequest> param(final String key) { return StringConditionBuilder.instance(this, r -> r.getParameter(key), c -> builder.add(c), "param["+key+"]"); }
