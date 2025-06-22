@@ -23,6 +23,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  *
@@ -67,13 +68,15 @@ public class HeadersWrapper {
         return null;
     }
 
-    public static HeadersWrapper instance(HttpServletRequest request) {
+    public static HeadersWrapper instance(HttpServletRequest request, Predicate<String> filter) {
         if(request == null) return null;
         HeadersWrapper headers = new HeadersWrapper();
         Enumeration<String> en = request.getHeaderNames();
         if(en != null) {
             while(en.hasMoreElements()) {
                 String name = en.nextElement();
+                if(filter == null) continue;
+                if(!filter.test(name)) continue;
                 Enumeration<String> vals = request.getHeaders(name);
                 if(vals != null) {
                     while(vals.hasMoreElements()) {
@@ -86,12 +89,14 @@ public class HeadersWrapper {
         return headers;
     }
 
-    public static HeadersWrapper instance(HttpServletResponse response) {
+    public static HeadersWrapper instance(HttpServletResponse response, Predicate<String> filter) {
         if(response == null) return null;
         HeadersWrapper headers = new HeadersWrapper();
         Collection<String> en = response.getHeaderNames();
         if(en != null) {
             for(String name : en) {
+                if(filter == null) continue;
+                if(!filter.test(name)) continue;
                 Collection<String> vals = response.getHeaders(name);
                 if(vals != null) {
                     for(String value : vals) {
