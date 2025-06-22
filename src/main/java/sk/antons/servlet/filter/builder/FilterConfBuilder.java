@@ -113,6 +113,12 @@ public class FilterConfBuilder<C> {
      */
     public FilterConfBuilder<C> remoteHost(boolean value) { this.conf.remoteHost(value); return this; }
     /**
+     * Add protocol to request info
+     * @param value true if protocol should be displayed
+     * @return this
+     */
+    public FilterConfBuilder<C> protocol(boolean value) { this.conf.protocol(value); return this; }
+    /**
      * Do not log anything.
      * @param value true if no logging must be done
      * @return this

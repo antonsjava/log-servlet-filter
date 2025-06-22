@@ -127,7 +127,7 @@ public class LogFilter implements Filter {
                 if((conf.requestStartPrefix() != null) && (selector.responseCondition() == null)) { //if response condition ia aplied ths message is irelevant
                     StringBuilder sb = new StringBuilder();
                     sb.append(conf.requestStartPrefix())
-                        .append('[').append(id).append("} ")
+                        .append('[').append(id).append("] ")
                         .append(formatter.prefixMessage());
                     conf.messageConsumer().accept(sb.toString());
                 }
@@ -153,7 +153,7 @@ public class LogFilter implements Filter {
                     if(conf.requestPrefix() != null) {
                         StringBuilder sb = new StringBuilder();
                         sb.append(conf.requestPrefix())
-                            .append('[').append(id).append("} ")
+                            .append('[').append(id).append("] ")
                             .append(formatter.requestMessage());
                         conf.messageConsumer().accept(sb.toString());
                     }
@@ -161,7 +161,7 @@ public class LogFilter implements Filter {
                         responseData(response, conf, formatter);
                         StringBuilder sb = new StringBuilder();
                         sb.append(conf.responsePrefix())
-                            .append('[').append(id).append("} ")
+                            .append('[').append(id).append("] ")
                             .append(formatter.responseMessage());
                         conf.messageConsumer().accept(sb.toString());
                     }
@@ -193,8 +193,8 @@ public class LogFilter implements Filter {
     protected void requestData(ServletRequestWrapper request, FilterConf conf, Formatter formatter) {
         HttpServletRequestWrapper httprequest = null;
         if(request instanceof HttpServletRequestWrapper) httprequest = (HttpServletRequestWrapper)request;
+        if(conf.protocol()) formatter.protocol(request.getProtocol());
         if(httprequest != null) {
-            formatter.protocol(httprequest.getProtocol());
             formatter.method(httprequest.getMethod());
             formatter.path(httprequest.getRequestURI());
             formatter.query(httprequest.getQueryString());

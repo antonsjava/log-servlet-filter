@@ -14,7 +14,7 @@ import sk.antons.servlet.filter.HeadersWrapper;
 public abstract class AbstractFormatter implements Formatter {
 
     protected String protocol;
-    @Override public void protocol(String value) { this.method = value; }
+    @Override public void protocol(String value) { this.protocol = value; }
 
     protected String method;
     @Override public void method(String value) { this.method = value; }

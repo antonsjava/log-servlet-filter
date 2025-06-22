@@ -18,7 +18,7 @@ public class OneLineFormatter extends AbstractFormatter implements Formatter {
     @Override
     public String prefixMessage() {
         StringBuilder sb = new StringBuilder();
-        sb.append(method).append(' ').append(uri());
+        sb.append(method).append(' ').append(uri()).append(" vvv");
         return sb.toString();
     }
 

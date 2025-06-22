@@ -26,28 +26,28 @@ public class MultiLineFormatter extends AbstractFormatter implements Formatter {
     public String requestMessage() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(method).append(' ').append(uri());
-
-        if(protocol != null) sb.append(' ').append(protocol);
-
         if(requestAttrs != null) {
             for(Attr requestAttr : requestAttrs) {
                 sb.append(' ').append(requestAttr.name).append('(').append(requestAttr.value).append(')');
             }
         }
+        sb.append('\n');
+
+        sb.append(method).append(' ').append(uri());
+        if(protocol != null) sb.append(' ').append(protocol);
+        sb.append('\n');
 
         if(requestHeaders != null) {
-            sb.append(" headers[");
-            boolean first = true;
             for(HeadersWrapper.Header header : requestHeaders.headers()) {
-                if(first) first = false; else sb.append(", ");
-                sb.append(header.name()).append(": ").append(header.value());
+                sb.append(header.name()).append(": ").append(header.value()).append('\n');
             }
-            sb.append(']');
         }
 
+        sb.append('\n');
+
         if(requestPayload != null) {
-            sb.append(" payload[").append(requestPayload).append("] size: ").append(requestPayload.length());
+            sb.append(requestPayload);
+            sb.append('\n');
         }
 
         return sb.toString();
@@ -57,17 +57,28 @@ public class MultiLineFormatter extends AbstractFormatter implements Formatter {
     public String responseMessage() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(method).append(' ').append(uri());
+        sb.append('\n');
 
-        sb.append(" status: ").append(responseStatus);
-        sb.append(" time: ").append(time);
+        if(protocol != null) sb.append(protocol);
+        sb.append(' ').append(responseStatus);
+        sb.append('\n');
+
+        if(responseHeaders != null) {
+            for(HeadersWrapper.Header header : responseHeaders.headers()) {
+                sb.append(header.name()).append(": ").append(header.value()).append('\n');
+            }
+        }
+
+        sb.append('\n');
 
         if(error != null) {
             sb.append(" error[").append(errorAsString(error)).append(']');
+            sb.append('\n');
         }
 
         if(responsePayload != null) {
-            sb.append(" payload[").append(responsePayload).append("] size: ").append(responsePayload.length());
+            sb.append(responsePayload);
+            sb.append('\n');
         }
 
         return sb.toString();
