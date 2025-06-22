@@ -32,7 +32,9 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import sk.antons.servlet.filter.builder.LogFilterBuilder;
+import sk.antons.servlet.filter.formatter.Formatter;
 import sk.antons.servlet.util.HttpServletRequestWrapper;
 import sk.antons.servlet.util.HttpServletResponseWrapper;
 import sk.antons.servlet.util.JsonFormat;
@@ -108,11 +110,12 @@ public class LogFilter implements Filter {
     private static long requestId = 1;
     protected void doFilterInternal(ServletRequestWrapper request, ServletResponseWrapper response, FilterConfSelector selector, FilterChain filterChain) throws ServletException, IOException {
         FilterConf conf = selector.conf();
-        StringBuilder pathbuff = new StringBuilder();
-        StringBuilder requestheaderbuff = new StringBuilder();
-        StringBuilder requestpayloadbuff = new StringBuilder();
-        StringBuilder responseheadersbuff = new StringBuilder();
-        StringBuilder responsepayloadbuff = new StringBuilder();
+        //StringBuilder pathbuff = new StringBuilder();
+        //StringBuilder requestheaderbuff = new StringBuilder();
+        //StringBuilder requestpayloadbuff = new StringBuilder();
+        //StringBuilder responseheadersbuff = new StringBuilder();
+        //StringBuilder responsepayloadbuff = new StringBuilder();
+        Formatter formatter = conf.formatter().formatter();
         boolean responseAllowed = true;
         int status = -1;
         int exceprionStatus = -1;
@@ -120,13 +123,12 @@ public class LogFilter implements Filter {
         long starttime = System.currentTimeMillis();
         try {
             if (conf.messageConsumerEnabled().getAsBoolean()) {
-                requestData(request, conf, pathbuff, requestheaderbuff, requestpayloadbuff);
-                if((conf.requestStartPrefix() != null) && (selector.responseCondition() == null)) {
+                requestData(request, conf, formatter);
+                if((conf.requestStartPrefix() != null) && (selector.responseCondition() == null)) { //if response condition ia aplied ths message is irelevant
                     StringBuilder sb = new StringBuilder();
                     sb.append(conf.requestStartPrefix())
-                        .append('[').append(id).append(']')
-                        .append(pathbuff)
-                        .append(" vvv");
+                        .append('[').append(id).append("} ")
+                        .append(formatter.prefixMessage());
                     conf.messageConsumer().accept(sb.toString());
                 }
             }
@@ -137,43 +139,30 @@ public class LogFilter implements Filter {
                 if(selector.responseCondition() != null) responseAllowed = selector.responseCondition().check(httpresponse);
             }
         } catch(Throwable t) {
+            formatter.error(t);
             exceprionStatus = 500;
-            if (conf.messageConsumerEnabled().getAsBoolean()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(conf.responsePrefix())
-                    .append('[').append(id).append(']')
-                    .append(" ServletException ")
-                    .append(pathbuff).append(' ').append(t);
-                conf.messageConsumer().accept(sb.toString());
-            }
             if(t instanceof IOException) throw (IOException)t;
             else if(t instanceof ServletException) throw (ServletException)t;
             else throw new ServletException(t);
         } finally {
+            long endtime = System.currentTimeMillis();
+            long time = (endtime - starttime);
+            formatter.time(time);
             if (conf.messageConsumerEnabled().getAsBoolean()) {
-                if(exceprionStatus > 0) status = exceprionStatus;
-                if((status <= 0) || responseAllowed) {
-                    responseData(response, conf, responseheadersbuff, responsepayloadbuff);
-                    long endtime = System.currentTimeMillis();
-                    long time = (endtime - starttime);
+                if(responseAllowed) {
                     if(conf.requestPrefix() != null) {
                         StringBuilder sb = new StringBuilder();
                         sb.append(conf.requestPrefix())
-                            .append('[').append(id).append(']')
-                            .append(pathbuff)
-                            .append(requestheaderbuff)
-                            .append(requestpayloadbuff);
+                            .append('[').append(id).append("} ")
+                            .append(formatter.requestMessage());
                         conf.messageConsumer().accept(sb.toString());
                     }
                     if(conf.responsePrefix() != null) {
+                        responseData(response, conf, formatter);
                         StringBuilder sb = new StringBuilder();
                         sb.append(conf.responsePrefix())
-                            .append('[').append(id).append(']')
-                            .append(pathbuff);
-                        sb.append(" status: ").append(status);
-                        sb.append(" time: ").append(time)
-                            .append(responseheadersbuff)
-                            .append(responsepayloadbuff);
+                            .append('[').append(id).append("} ")
+                            .append(formatter.responseMessage());
                         conf.messageConsumer().accept(sb.toString());
                     }
                 }
@@ -201,37 +190,31 @@ public class LogFilter implements Filter {
         }
     }
 
-    protected void requestData(ServletRequestWrapper request, FilterConf conf, StringBuilder pathbuff, StringBuilder requestheaderbuff, StringBuilder requestpayloadbuff) {
+    protected void requestData(ServletRequestWrapper request, FilterConf conf, Formatter formatter) {
         HttpServletRequestWrapper httprequest = null;
         if(request instanceof HttpServletRequestWrapper) httprequest = (HttpServletRequestWrapper)request;
         if(httprequest != null) {
-            String method = httprequest.getMethod();
-            String pathString = httprequest.getRequestURI();
-            String queryString = httprequest.getQueryString();
-            pathbuff.append(' ').append(method).append(' ').append(pathString);
-            if(queryString != null) pathbuff.append('?').append(queryString);
+            formatter.protocol(httprequest.getProtocol());
+            formatter.method(httprequest.getMethod());
+            formatter.path(httprequest.getRequestURI());
+            formatter.query(httprequest.getQueryString());
         }
         if(conf.identity() && (httprequest != null)) {
-            requestheaderbuff.append(" identity(");
             try {
                 Principal user = httprequest.getUserPrincipal();
-                if(user != null) requestheaderbuff.append(user.getName());
+                formatter.requestAttr("identity", user.getName());
             } catch(Exception e) {
             }
-            requestheaderbuff.append(")");
         }
         if(conf.remoteAddr()&& (httprequest != null)) {
-            requestheaderbuff.append(" addr(").append(httprequest.getRemoteAddr()).append(")");
+            formatter.requestAttr("addr", httprequest.getRemoteAddr());
         }
         if(conf.remoteHost()&& (httprequest != null)) {
-            requestheaderbuff.append(" host(").append(httprequest.getRemoteHost()).append(")");
+            formatter.requestAttr("host", httprequest.getRemoteHost());
         }
-        if((conf.requestHeaderFormatter()!= null) && (httprequest != null)) {
-            HeadersWrapper headers = HeadersWrapper.instance(httprequest);
-            requestheaderbuff.append(' ').append(request.getProtocol());
-            requestheaderbuff.append(" headers(");
-            requestheaderbuff.append(conf.requestHeaderFormatter().apply(headers));
-            requestheaderbuff.append(")");
+        if((conf.requestHeaderFilter() != null) && (httprequest != null)) {
+            HeadersWrapper headers = HeadersWrapper.instance(httprequest, conf.requestHeaderFilter());
+            formatter.requestHeaders(headers);
         }
 
         if(conf.requestPayloadFormatter() != null) {
@@ -242,21 +225,20 @@ public class LogFilter implements Filter {
                 text = "unable to read payload "+e;
             }
             if(text == null) text = "";
-            int length = text.length();
-            requestpayloadbuff.append(" payload[").append(text).append(']');
-            requestpayloadbuff.append(" size: ").append(length);
+            formatter.requestPayload(text);
         }
 
     }
 
-    protected void responseData(ServletResponseWrapper response, FilterConf conf, StringBuilder responseheadersbuff, StringBuilder responsepayloadbuff) {
+    protected void responseData(ServletResponseWrapper response, FilterConf conf, Formatter formatter) {
         HttpServletResponseWrapper httpresponse = null;
         if(response instanceof HttpServletResponseWrapper) httpresponse = (HttpServletResponseWrapper)response;
-        if((conf.responseHeaderFormatter() != null) && (httpresponse != null)) {
-            HeadersWrapper headers = HeadersWrapper.instance(httpresponse);
-            responseheadersbuff.append(" headers(");
-            responseheadersbuff.append(conf.responseHeaderFormatter().apply(headers));
-            responseheadersbuff.append(")");
+        if(httpresponse != null) {
+            if(conf.responseHeaderFilter() != null) {
+                HeadersWrapper headers = HeadersWrapper.instance(httpresponse, conf.responseHeaderFilter());
+                formatter.responseHeaders(headers);
+            }
+            formatter.responseStatus(httpresponse.getStatus());
         }
 
         if(conf.responsePayloadFormatter() != null) {
@@ -267,9 +249,7 @@ public class LogFilter implements Filter {
                 text = "unable to read payload "+e;
             }
             if(text == null) text = "";
-            int length = text.length();
-            responsepayloadbuff.append(" payload[").append(text).append(']');
-            responsepayloadbuff.append(" size: ").append(length);
+            formatter.responsePayload(text);
         }
 
     }
@@ -300,51 +280,22 @@ public class LogFilter implements Filter {
          * Converts HttpHeaders as list of (key: value) pairs for all header values.
          * @return
          */
-        public static Function<sk.antons.servlet.filter.HeadersWrapper, String> all() {
-            return headers -> {
-                StringBuffer sb = new StringBuffer();
-                sb.append("headers[");
-                if(headers != null) {
-                    boolean first = true;
-                    for(sk.antons.servlet.filter.HeadersWrapper.Header header : headers.headers()) {
-                        if(first) first = false;
-                        else sb.append(", ");
-                        sb.append(header.name()).append(": ").append(header.value());
-                    }
-                }
-                sb.append("]");
-                return sb.toString();
-            };
+        public static Predicate<String> all() {
+            return (name) -> true;
         }
 
         /**
          * Converts HttpHeaders as list of (key: value) pairs for listed header values.
          * @return
          */
-        public static Function<sk.antons.servlet.filter.HeadersWrapper, String> listed(final String... name) {
-            return headers -> {
-                StringBuffer sb = new StringBuffer();
-                sb.append("headers[");
-                if((headers != null) && (name != null)) {
-                    boolean first = true;
-                    for(sk.antons.servlet.filter.HeadersWrapper.Header header : headers.headers()) {
-                        String key = header.name();
-                        boolean match = false;
-                        for(String string : name) {
-                            if(key.equalsIgnoreCase(string)) {
-                                match = true;
-                                break;
-                            }
-                        }
-                        if(match) {
-                            if(first) first = false;
-                            else sb.append(", ");
-                            sb.append(key).append(": ").append(header.value());
-                        }
-                    }
+        public static Predicate<String> listed(final String... names) {
+            return (name) -> {
+                if(name == null) return false;
+                if(names == null) return false;
+                for(String nm : names) {
+                    if(name.equalsIgnoreCase(nm)) return true;
                 }
-                sb.append("]");
-                return sb.toString();
+                return false;
             };
         }
     }

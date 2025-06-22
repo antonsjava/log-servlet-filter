@@ -19,6 +19,9 @@ import java.io.InputStream;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import sk.antons.servlet.filter.formatter.OneLineFormatter;
+import sk.antons.servlet.filter.formatter.FormatterFactory;
 
 /**
  * Log filter instance configuration.
@@ -27,6 +30,7 @@ import java.util.function.Function;
  */
 public class FilterConf implements Cloneable {
 
+    private FormatterFactory formatter = OneLineFormatter.Factory.instance();
     private Consumer<String> messageConsumer;
     private BooleanSupplier messageConsumerEnabled;
     private String requestStartPrefix = "REQ";
@@ -35,10 +39,11 @@ public class FilterConf implements Cloneable {
     private boolean identity = false;
     private boolean remoteHost = false;
     private boolean remoteAddr = false;
+    private boolean protocol = false;
     private boolean doNothing = false;
-    private Function<HeadersWrapper, String> requestHeaderFormatter;
+    private Predicate<String> requestHeaderFilter;
     private Function<InputStream, String> requestPayloadFormatter;
-    private Function<HeadersWrapper, String> responseHeaderFormatter;
+    private Predicate<String> responseHeaderFilter;
     private Function<InputStream, String> responsePayloadFormatter;
 
     public Consumer<String> messageConsumer() { return messageConsumer; }
@@ -49,11 +54,13 @@ public class FilterConf implements Cloneable {
     public boolean identity() { return identity; }
     public boolean remoteAddr() { return remoteAddr; }
     public boolean remoteHost() { return remoteHost; }
+    public boolean protocol() { return protocol; }
     public boolean doNothing() { return doNothing; }
-    public Function<HeadersWrapper, String> requestHeaderFormatter() { return requestHeaderFormatter; }
+    public Predicate<String> requestHeaderFilter() { return requestHeaderFilter; }
     public Function<InputStream, String> requestPayloadFormatter() { return requestPayloadFormatter; }
-    public Function<HeadersWrapper, String> responseHeaderFormatter() { return responseHeaderFormatter; }
+    public Predicate<String> responseHeaderFilter() { return responseHeaderFilter; }
     public Function<InputStream, String> responsePayloadFormatter() { return responsePayloadFormatter; }
+    public FormatterFactory formatter() { return formatter; }
 
     /**
      * create default instance of configuration.
@@ -109,17 +116,23 @@ public class FilterConf implements Cloneable {
      */
     public FilterConf remoteAddr(boolean value) { this.remoteAddr = value; return this; }
     /**
+     * Add protocol to request info
+     * @param value true if protocol should be displayed
+     * @return this
+     */
+    public FilterConf protocol(boolean value) { this.protocol = value; return this; }
+    /**
      * Do not log anything.
      * @param value true if no logging must be done
      * @return this
      */
     public FilterConf doNothing(boolean value) { this.doNothing = value; return this; }
     /**
-     * How to format header to request info. (default no header is printed)
+     * Which headers to print. (default no header is printed)
      * @param value like LogFilter.Header.all()
      * @return this
      */
-    public FilterConf requestHeaderFormatter(Function<HeadersWrapper, String> value) { this.requestHeaderFormatter = value; return this; }
+    public FilterConf requestHeaderFilter(Predicate<String> value) { this.requestHeaderFilter = value; return this; }
     /**
      * How to format body to request info. (default no body is printed)
      * @param value like LogFilter.Body.asIs()
@@ -127,17 +140,23 @@ public class FilterConf implements Cloneable {
      */
     public FilterConf requestPayloadFormatter(Function<InputStream, String> value) { this.requestPayloadFormatter = value; return this; }
     /**
-     * How to format header to response info. (default no header is printed)
+     * Which header is printed. (default no header is printed)
      * @param value like LogFilter.Header.all()
      * @return this
      */
-    public FilterConf responseHeaderFormatter(Function<HeadersWrapper, String> value) { this.responseHeaderFormatter = value; return this; }
+    public FilterConf responseHeaderFilter(Predicate<String> value) { this.responseHeaderFilter = value; return this; }
     /**
      * How to format body to response info. (default no body is printed)
      * @param value like LogFilter.Body.asIs()
      * @return this
      */
     public FilterConf responsePayloadFormatter(Function<InputStream, String> value) { this.responsePayloadFormatter = value; return this; }
+    /**
+     * How to format whole message. (default is simple line formatter)
+     * @param value formatter instance
+     * @return this
+     */
+    public FilterConf formatter(FormatterFactory value) { this.formatter = value; return this; }
 
     public FilterConf copy() {
         try {
@@ -158,11 +177,12 @@ public class FilterConf implements Cloneable {
         if(remoteHost) sb.append(", host");
         if(requestStartPrefix != null) sb.append(", requestStartPrefix=").append(requestStartPrefix);
         if(requestPrefix != null) sb.append(", requestPrefix=").append(requestPrefix);
-        if(requestHeaderFormatter != null) sb.append(", requestHeader");
+        if(requestHeaderFilter != null) sb.append(", requestHeader");
         if(requestPayloadFormatter != null) sb.append(", requestPayload");
         if(responsePrefix != null) sb.append(", responsePrefix=").append(responsePrefix);
-        if(responseHeaderFormatter != null) sb.append(", responseHeader");
+        if(responseHeaderFilter != null) sb.append(", responseHeader");
         if(responsePayloadFormatter != null) sb.append(", responsePayload");
+        if(formatter != null) sb.append(", formatter " + formatter.getClass());
         sb.append(']');
         return sb.toString();
     }

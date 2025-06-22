@@ -19,8 +19,11 @@ import java.io.InputStream;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import sk.antons.servlet.filter.FilterConf;
-import sk.antons.servlet.filter.HeadersWrapper;
+import sk.antons.servlet.filter.formatter.FormatterFactory;
+import sk.antons.servlet.filter.formatter.MultiLineFormatter;
+import sk.antons.servlet.filter.formatter.OneLineFormatter;
 
 /**
  * Builder for log filter configuration
@@ -116,11 +119,11 @@ public class FilterConfBuilder<C> {
      */
     public FilterConfBuilder<C> doNothing(boolean value) { this.conf.doNothing(value); return this; }
     /**
-     * How to format header to request info. (default no header is printed)
+     * Which header to print. (default no header is printed)
      * @param value like LogFilter.Header.all()
      * @return this
      */
-    public FilterConfBuilder<C> requestHeaderFormatter(Function<HeadersWrapper, String> value) { this.conf.requestHeaderFormatter(value); return this; }
+    public FilterConfBuilder<C> requestHeaderFilter(Predicate<String> value) { this.conf.requestHeaderFilter(value); return this; }
     /**
      * How to format body to request info. (default no body is printed)
      * @param value like LogFilter.Body.asIs()
@@ -128,11 +131,11 @@ public class FilterConfBuilder<C> {
      */
     public FilterConfBuilder<C> requestPayloadFormatter(Function<InputStream, String> value) { this.conf.requestPayloadFormatter(value); return this; }
     /**
-     * How to format header to response info. (default no header is printed)
+     * Which header to print. (default no header is printed)
      * @param value like LogFilter.Header.all()
      * @return this
      */
-    public FilterConfBuilder<C> responseHeaderFormatter(Function<HeadersWrapper, String> value) { this.conf.responseHeaderFormatter(value); return this; }
+    public FilterConfBuilder<C> responseHeaderFilter(Predicate<String> value) { this.conf.responseHeaderFilter(value); return this; }
     /**
      * How to format body to response info. (default no body is printed)
      * @param value like LogFilter.Body.asIs()
@@ -140,5 +143,23 @@ public class FilterConfBuilder<C> {
      */
     public FilterConfBuilder<C> responsePayloadFormatter(Function<InputStream, String> value) { this.conf.responsePayloadFormatter(value); return this; }
 
+    /**
+     * Formatter used to create messages to log. (default is one line formatter)
+     * @param value like OneLineFormatter.Factory.instance()
+     * @return this
+     */
+    public FilterConfBuilder<C> formatter(FormatterFactory value) { this.conf.formatter(value); return this; }
+
+    /**
+     * Formatter used to create messages to log is set to one line formatter.
+     * @return this
+     */
+    public FilterConfBuilder<C> oneLineFormatter() { this.conf.formatter(OneLineFormatter.Factory.instance()); return this; }
+
+    /**
+     * Formatter used to create messages to log is set to multi line formatter.
+     * @return this
+     */
+    public FilterConfBuilder<C> multiLineFormatter() { this.conf.formatter(MultiLineFormatter.Factory.instance()); return this; }
 
 }
