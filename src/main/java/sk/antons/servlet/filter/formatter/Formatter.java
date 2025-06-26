@@ -3,6 +3,7 @@
  */
 package sk.antons.servlet.filter.formatter;
 
+import java.io.IOException;
 import sk.antons.servlet.filter.HeadersWrapper;
 
 /**
@@ -11,9 +12,9 @@ import sk.antons.servlet.filter.HeadersWrapper;
  */
 public interface Formatter {
 
-    String prefixMessage();
-    String requestMessage();
-    String responseMessage();
+    void prefixMessage(Appendable appender) throws IOException;
+    void requestMessage(Appendable appender) throws IOException;
+    void responseMessage(Appendable appender) throws IOException;
 
 
     void protocol(String value);

@@ -4,7 +4,7 @@
 
     <groupId>io.github.antonsjava</groupId>
     <artifactId>log-servlet-filter</artifactId>
-    <version>3.6</version>
+    <version>3.7</version>
     <packaging>jar</packaging>
 
     <name>log-servlet-filter</name>
@@ -60,6 +60,11 @@
             <groupId>io.github.antonsjava</groupId>
             <artifactId>web-path-matcher</artifactId>
             <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.antonsjava</groupId>
+            <artifactId>log-helpers</artifactId>
+            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>jakarta.platform</groupId>

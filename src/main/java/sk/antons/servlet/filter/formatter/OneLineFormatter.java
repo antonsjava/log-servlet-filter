@@ -3,6 +3,7 @@
  */
 package sk.antons.servlet.filter.formatter;
 
+import java.io.IOException;
 import sk.antons.servlet.filter.HeadersWrapper;
 
 
@@ -16,15 +17,13 @@ public class OneLineFormatter extends AbstractFormatter implements Formatter {
     public static OneLineFormatter instance() { return new OneLineFormatter(); }
 
     @Override
-    public String prefixMessage() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(method).append(' ').append(uri()).append(" vvv");
-        return sb.toString();
+    public void prefixMessage(Appendable appender) throws IOException {
+        appender.append(method).append(' ').append(uri()).append(" vvv");
     }
 
     @Override
-    public String requestMessage() {
-        StringBuilder sb = new StringBuilder();
+    public void requestMessage(Appendable appender) throws IOException {
+        Appendable sb = appender;
 
         sb.append(method).append(' ').append(uri());
 
@@ -47,34 +46,32 @@ public class OneLineFormatter extends AbstractFormatter implements Formatter {
         }
 
         if(requestPayload != null) {
-            sb.append(" payload[").append(requestPayload).append("] size: ").append(requestPayload.length());
+            sb.append(" payload[").append(requestPayload).append("] size: ").append(String.valueOf(requestPayload.length()));
         }
 
-        return sb.toString();
     }
 
     @Override
-    public String responseMessage() {
-        StringBuilder sb = new StringBuilder();
+    public void responseMessage(Appendable appender) throws IOException {
+        Appendable sb = appender;
 
         sb.append(method).append(' ').append(uri());
 
-        sb.append(" status: ").append(responseStatus);
-        sb.append(" time: ").append(time);
+        sb.append(" status: ").append(String.valueOf(responseStatus));
+        sb.append(" time: ").append(String.valueOf(time));
 
         if(error != null) {
             sb.append(" error[").append(errorAsString(error)).append(']');
         }
 
         if(responsePayload != null) {
-            sb.append(" payload[").append(responsePayload).append("] size: ").append(responsePayload.length());
+            sb.append(" payload[").append(responsePayload).append("] size: ").append(String.valueOf(responsePayload.length()));
         }
 
-        return sb.toString();
     }
 
     protected String errorAsString(Throwable value) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(500);
         boolean first = true;
         while(value != null) {
             if(first) first = false; else sb.append(", causedBy: ");

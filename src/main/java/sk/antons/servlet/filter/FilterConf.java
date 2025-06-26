@@ -45,6 +45,8 @@ public class FilterConf implements Cloneable {
     private Function<InputStream, String> requestPayloadFormatter;
     private Predicate<String> responseHeaderFilter;
     private Function<InputStream, String> responsePayloadFormatter;
+    private int expectedRequestLength = 4096;
+    private int expectedResponseLength = 4096;
 
     public Consumer<String> messageConsumer() { return messageConsumer; }
     public BooleanSupplier messageConsumerEnabled() { return messageConsumerEnabled; }
@@ -61,6 +63,8 @@ public class FilterConf implements Cloneable {
     public Predicate<String> responseHeaderFilter() { return responseHeaderFilter; }
     public Function<InputStream, String> responsePayloadFormatter() { return responsePayloadFormatter; }
     public FormatterFactory formatter() { return formatter; }
+    public int expectedRequestLength() { return expectedRequestLength; }
+    public int expectedResponseLength() { return expectedResponseLength; }
 
     /**
      * create default instance of configuration.
@@ -157,6 +161,18 @@ public class FilterConf implements Cloneable {
      * @return this
      */
     public FilterConf formatter(FormatterFactory value) { this.formatter = value; return this; }
+    /**
+     * expected request length. (default is 4096)
+     * @param value expected length
+     * @return this
+     */
+    public FilterConf expectedRequestLength(int value) { this.expectedRequestLength = value; return this; }
+    /**
+     * expected response length. (default is 4096)
+     * @param value expected length
+     * @return this
+     */
+    public FilterConf expectedResponseLength(int value) { this.expectedResponseLength = value; return this; }
 
     public FilterConf copy() {
         try {
@@ -169,7 +185,7 @@ public class FilterConf implements Cloneable {
     @Override
     public String toString() {
         if(doNothing) return "doNothing";
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(300);
         sb.append("[");
         sb.append("enabled=").append(messageConsumerEnabled.getAsBoolean());
         if(identity) sb.append(", identity");

@@ -3,6 +3,7 @@
  */
 package sk.antons.servlet.filter.formatter;
 
+import java.io.IOException;
 import sk.antons.servlet.filter.HeadersWrapper;
 
 
@@ -16,15 +17,13 @@ public class MultiLineFormatter extends AbstractFormatter implements Formatter {
     public static MultiLineFormatter instance() { return new MultiLineFormatter(); }
 
     @Override
-    public String prefixMessage() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(method).append(' ').append(uri());
-        return sb.toString();
+    public void prefixMessage(Appendable appender) throws IOException {
+        appender.append(method).append(' ').append(uri());
     }
 
     @Override
-    public String requestMessage() {
-        StringBuilder sb = new StringBuilder();
+    public void requestMessage(Appendable appender) throws IOException {
+        Appendable sb = appender;
 
         if(requestAttrs != null) {
             for(Attr requestAttr : requestAttrs) {
@@ -50,17 +49,16 @@ public class MultiLineFormatter extends AbstractFormatter implements Formatter {
             sb.append('\n');
         }
 
-        return sb.toString();
     }
 
     @Override
-    public String responseMessage() {
-        StringBuilder sb = new StringBuilder();
+    public void responseMessage(Appendable appender) throws IOException {
+        Appendable sb = appender;
 
         sb.append('\n');
 
         if(protocol != null) sb.append(protocol);
-        sb.append(' ').append(responseStatus);
+        sb.append(' ').append(String.valueOf(responseStatus));
         sb.append('\n');
 
         if(responseHeaders != null) {
@@ -81,11 +79,10 @@ public class MultiLineFormatter extends AbstractFormatter implements Formatter {
             sb.append('\n');
         }
 
-        return sb.toString();
     }
 
     protected String errorAsString(Throwable value) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(500);
         boolean first = true;
         while(value != null) {
             if(first) first = false; else sb.append(", causedBy: ");

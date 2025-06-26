@@ -39,7 +39,7 @@ public class FilterConfSelector {
     public FilterConfSelector responseCondition(Condition<HttpServletResponse> value) { this.responseCondition = value; return this; }
 
     public String configurationInfo() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(300);
         sb.append("\n---- case -------");
         if(requestCondition != null) sb.append("\n  when request: ").append(requestCondition);
         if(responseCondition != null) sb.append("\n  when response: ").append(responseCondition);

@@ -33,14 +33,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import sk.antons.loghelpers.format.JsonFormat;
+import sk.antons.loghelpers.format.XmlFormat;
 import sk.antons.servlet.filter.builder.LogFilterBuilder;
 import sk.antons.servlet.filter.formatter.Formatter;
 import sk.antons.servlet.util.HttpServletRequestWrapper;
 import sk.antons.servlet.util.HttpServletResponseWrapper;
-import sk.antons.servlet.util.JsonFormat;
 import sk.antons.servlet.util.ServletRequestWrapper;
 import sk.antons.servlet.util.ServletResponseWrapper;
-import sk.antons.servlet.util.XmlFormat;
 
 /**
  * Helper class for creating servlet filter for logging requests and responses.
@@ -110,11 +110,6 @@ public class LogFilter implements Filter {
     private static long requestId = 1;
     protected void doFilterInternal(ServletRequestWrapper request, ServletResponseWrapper response, FilterConfSelector selector, FilterChain filterChain) throws ServletException, IOException {
         FilterConf conf = selector.conf();
-        //StringBuilder pathbuff = new StringBuilder();
-        //StringBuilder requestheaderbuff = new StringBuilder();
-        //StringBuilder requestpayloadbuff = new StringBuilder();
-        //StringBuilder responseheadersbuff = new StringBuilder();
-        //StringBuilder responsepayloadbuff = new StringBuilder();
         Formatter formatter = conf.formatter().formatter();
         boolean responseAllowed = true;
         int status = -1;
@@ -125,10 +120,10 @@ public class LogFilter implements Filter {
             if (conf.messageConsumerEnabled().getAsBoolean()) {
                 requestData(request, conf, formatter);
                 if((conf.requestStartPrefix() != null) && (selector.responseCondition() == null)) { //if response condition ia aplied ths message is irelevant
-                    StringBuilder sb = new StringBuilder();
+                    StringBuilder sb = new StringBuilder(500);
                     sb.append(conf.requestStartPrefix())
-                        .append('[').append(id).append("] ")
-                        .append(formatter.prefixMessage());
+                        .append('[').append(id).append("] ");
+                    formatter.prefixMessage(sb);
                     conf.messageConsumer().accept(sb.toString());
                 }
             }
@@ -151,18 +146,18 @@ public class LogFilter implements Filter {
             if (conf.messageConsumerEnabled().getAsBoolean()) {
                 if(responseAllowed) {
                     if(conf.requestPrefix() != null) {
-                        StringBuilder sb = new StringBuilder();
+                        StringBuilder sb = new StringBuilder(conf.expectedRequestLength() + 50);
                         sb.append(conf.requestPrefix())
-                            .append('[').append(id).append("] ")
-                            .append(formatter.requestMessage());
+                            .append('[').append(id).append("] ");
+                        formatter.requestMessage(sb);
                         conf.messageConsumer().accept(sb.toString());
                     }
                     if(conf.responsePrefix() != null) {
                         responseData(response, conf, formatter);
-                        StringBuilder sb = new StringBuilder();
+                        StringBuilder sb = new StringBuilder(conf.expectedResponseLength() + 50);
                         sb.append(conf.responsePrefix())
-                            .append('[').append(id).append("] ")
-                            .append(formatter.responseMessage());
+                            .append('[').append(id).append("] ");
+                        formatter.responseMessage(sb);
                         conf.messageConsumer().accept(sb.toString());
                     }
                 }
@@ -259,7 +254,7 @@ public class LogFilter implements Filter {
      * @return configuration info
      */
     public String configurationInfo() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(300);
         for(FilterConfSelector selector : selectors) {
             sb.append(selector.configurationInfo());
         }

@@ -163,9 +163,12 @@ public class FilterConfBuilder<C> {
     public FilterConfBuilder<C> oneLineFormatter() { this.conf.formatter(OneLineFormatter.Factory.instance()); return this; }
 
     /**
-     * Formatter used to create messages to log is set to multi line formatter.
+     * Expected response length. (defielt 4096)
+     * @param value expected length
      * @return this
      */
-    public FilterConfBuilder<C> multiLineFormatter() { this.conf.formatter(MultiLineFormatter.Factory.instance()); return this; }
+    public FilterConfBuilder<C> expectedResponseLength(int value) { this.conf.expectedResponseLength(value); return this; }
+
+
 
 }
