@@ -198,7 +198,7 @@ public class FilterConf implements Cloneable {
         if(responsePrefix != null) sb.append(", responsePrefix=").append(responsePrefix);
         if(responseHeaderFilter != null) sb.append(", responseHeader");
         if(responsePayloadFormatter != null) sb.append(", responsePayload");
-        if(formatter != null) sb.append(", formatter " + formatter.getClass());
+        if(formatter != null) sb.append(", formatter " + formatter.getClass().getSimpleName());
         sb.append(']');
         return sb.toString();
     }

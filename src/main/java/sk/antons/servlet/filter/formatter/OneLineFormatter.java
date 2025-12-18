@@ -64,6 +64,16 @@ public class OneLineFormatter extends AbstractFormatter implements Formatter {
             sb.append(" error[").append(errorAsString(error)).append(']');
         }
 
+        if(responseHeaders != null) {
+            sb.append(" headers[");
+            boolean first = true;
+            for(HeadersWrapper.Header header : responseHeaders.headers()) {
+                if(first) first = false; else sb.append(", ");
+                sb.append(header.name()).append(": ").append(header.value());
+            }
+            sb.append(']');
+        }
+
         if(responsePayload != null) {
             sb.append(" payload[").append(responsePayload).append("] size: ").append(String.valueOf(responsePayload.length()));
         }

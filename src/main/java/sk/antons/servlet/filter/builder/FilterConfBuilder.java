@@ -169,6 +169,13 @@ public class FilterConfBuilder<C> {
      */
     public FilterConfBuilder<C> expectedResponseLength(int value) { this.conf.expectedResponseLength(value); return this; }
 
+    /**
+     * Expected request length. (defielt 4096)
+     * @param value expected length
+     * @return this
+     */
+    public FilterConfBuilder<C> expectedRequestLength(int value) { this.conf.expectedRequestLength(value); return this; }
+
 
 
 }
